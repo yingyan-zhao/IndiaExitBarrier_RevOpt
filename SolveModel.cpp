@@ -17,9 +17,6 @@ tuple<EquStateV,EquStateVmat> alias::solveV(const ParaEst & para_est, const Para
     ArrayXd ResVal_E = calResidual_Value_Exit(para_est,para_vec);
 
     ArrayXd Vprime_PD_ini = ArrayXd::Zero(VEnd_PD.size());
-    Vprime_PD_ini.segment(0,para.N) = RevOpt.RevOpt_Prod;
-    Vprime_PD_ini.segment(para.N,para.N) = RevOpt.RevOpt_Prod;
-    cout << "VEnd_PD.size() = " << VEnd_PD.size() << ";  RevOpt.RevOpt_Prod.size() = " << RevOpt.RevOpt_Prod.size() << endl;
     for (size_t n = 0; n < 50; ++n) {
         EquV_PD = solveV_OneLoop(para_est,para_vec,Vprime_PD_ini,RevOpt,ResVal_E,threadsManagement);
         Vprime_PD_ini = EquV_PD.EVal_PD;
@@ -112,15 +109,16 @@ EquStateV alias::solveV_OneLoop(const ParaEst & para_est, const ParaVec & para_v
 
     //// expected value function
     /// Step 2. solve L_ur
-    ArrayXd EVal_PD_LurError = CalEVal_Lur_error(PD, para_vec, EVal_PD, para_est.sigma_Lerror_ur,threadsManagement); // With a chosen target, firms' expected value depends on the shocks on employment
-//    cout << "228" << endl;
-
+    EquV.EVal_PD_Lur = CalEVal_Lur_error(PD, para_vec, EVal_PD, para_est.sigma_Lerror_ur,threadsManagement); // With a chosen target, firms' expected value depends on the shocks on employment
     int InitialPeriod = 0; // whether this is the initial period.
-    EquV.EVal_PD_Lur = EVal_PD_LurError;
     tuple<ArrayXd,ArrayXd> t_Lur = solveOptLur(PD, para_est, para_vec, EquV.EVal_PD_Lur, InitialPeriod,threadsManagement);
     EquV.OptLur_PD = get<0>(t_Lur);
     EquV.EVal_PD_SE = get<1>(t_Lur);
-//    cout << "245" << endl;
+    // Eigen::Map<const Eigen::ArrayXXd> EVal_PD_SE_mat1(EquV.EVal_PD_SE.data(),para.N_Lur,para.N_phi*para.N_K);
+    // cout << "EVal_PD_SE_mat1 = " << EVal_PD_SE_mat1 << endl;
+    // Eigen::Map<const Eigen::ArrayXXd> EVal_PD_SE_mat2(EquV.EVal_PD_SE.data() + para.N,para.N_Lur,para.N_phi*para.N_K);
+    // cout << "EVal_PD_SE_mat2 = " << EVal_PD_SE_mat2 << endl;
+    // throw runtime_error("Not implemented");
 
     //// Step 1. Entry and exit
     tuple<ArrayXd,ArrayXd,ArrayXd> t_SE = calEV_ProbStatus_SE_logit(para_est, para_vec, ResVal_E, EquV.EVal_PD_SE,
@@ -128,7 +126,11 @@ EquStateV alias::solveV_OneLoop(const ParaEst & para_est, const ParaVec & para_v
     EquV.EVal_PD = get<0>(t_SE);
     EquV.ProbPD_S = get<1>(t_SE);
     EquV.ProbPD_E = get<2>(t_SE);
-//    cout << "259" << endl;
+    // Eigen::Map<const Eigen::ArrayXXd> EVal_PD_mat1(EquV.EVal_PD.data(),para.N_Lur,para.N_phi*para.N_K);
+    // cout << "EVal_PD_mat1 = " << EVal_PD_mat1 << endl;
+    // Eigen::Map<const Eigen::ArrayXXd> EVal_PD_mat2(EquV.EVal_PD.data() + para.N,para.N_Lur,para.N_phi*para.N_K);
+    // cout << "EVal_PD_mat2 = " << EVal_PD_mat2 << endl;
+    // throw runtime_error("Not implemented");
     return EquV;
 }
 //
@@ -201,7 +203,7 @@ ArrayXd alias::CalEVal_Lur_error(const int & PD, const ParaVec & para_vec, const
     ArrayXd EVprime_PD_ELur(para.N*PD);
     const int N_Lur = para.N_Lur;
     const int N_phi_K = para.N_phi * para.N_K;
-    const double tail_upper = 1e60;
+    const double tail_upper = 1e10;
 
     for (int i_PD = 0; i_PD < PD; ++i_PD) {
         Eigen::Map<const Eigen::ArrayXXd> EVal_mat(EVal_PD.data() + i_PD * para.N, N_Lur, N_phi_K);
@@ -252,21 +254,21 @@ tuple<ArrayXd,ArrayXd> alias::solveOptLur(const int & PD, const ParaEst & para_e
     }
 
     auto worker = [&](size_t ii, unsigned thread_id) {
-//    size_t thread_id = 0;
-//    for (size_t ii = 0; ii < para.N*PD; ++ii) {
+    // size_t thread_id = 0;
+    // for (size_t ii = 0; ii < para.N*PD; ++ii) {
         size_t i_PD = ii / para.N;
         size_t i = ii - i_PD * para.N;
 
-        const auto EVal_Lur_mat = EVal_Lur_PD_mat(seqN(i_PD * para.N_Lur,para.N_Lur), all);
+        const ArrayXXd EVal_Lur_mat = EVal_Lur_PD_mat(seqN(i_PD * para.N_Lur,para.N_Lur), all);
 
         Pos pos;
         pos.i_phi = i / (para.N_K * para.N_Lur);
         pos.i_K = (i - pos.i_phi * para.N_K * para.N_Lur ) / para.N_Lur;
-        pos.i_Lur = (i - pos.i_phi * para.N_K * para.N_Lur - pos.i_K * para.N_Lur ) / para.N_Lur;
+        pos.i_Lur = i - pos.i_phi * para.N_K * para.N_Lur - pos.i_K * para.N_Lur;
         int i_state = static_cast<int>(pos.i_phi * para.N_K + pos.i_K);
 
-//        cout << "i = " << i << "; pos.i_phi = " << pos.i_phi << "; pos.i_K = " << pos.i_K
-            // << "; pos.i_Lur = " << pos.i_Lur << "; int i_N = " << i_N << endl;
+        // cout << "i = " << i << "; pos.i_phi = " << pos.i_phi << "; pos.i_K = " << pos.i_K
+        //     << "; pos.i_Lur = " << pos.i_Lur << "; int i_state = " << i_state << endl;
 
         double Lbase = para_vec.vec_Lur(pos.i_Lur);
 
@@ -285,77 +287,78 @@ tuple<ArrayXd,ArrayXd> alias::solveOptLur(const int & PD, const ParaEst & para_e
             para_vec.vec_Lur, EVal_Lur_mat.col(i_state));
         OptLur_PD(ii) = get<0>(t_V);
         TotVOpt_PD(ii) = get<1>(t_V);
-//    }
+    // }
     };
     MultiThreads::simple_parallel_for(worker, para.N*PD, threadsManagement);
 //    cout << "699 = " << TotVOpt_PD.transpose() << endl;
+    // throw runtime_error("Error in SolveModel function");
     return tuple<ArrayXd,ArrayXd>(OptLur_PD,TotVOpt_PD);
 }
+//
+// /* Choose the targeted Luc to maximize the expected value by iteration */
+// tuple<ArrayXd,ArrayXd> alias::solveOptLur_iteration(const int & PD, const ParaEst & para_est, const ParaVec & para_vec,
+//     const ArrayXd & EVal_PD_Lur, const int & InitialPeriod, MultiThreads::Threads_Management & threadsManagement) {
+//
+//     ArrayXd TotVOpt_PD = ArrayXd::Zero(para.N*PD);
+//     ArrayXd OptLur_PD = ArrayXd::Zero(para.N*PD);
+//     const double wstar = para_est.w_ur * exp(0.5 * pow(para_est.sigma_Lerror_ur, 2));
+//
+//     ArrayXXd EVal_Lur_PD_mat( para.N_Lur*PD, para.N_phi * para.N_K);
+//     for (int i_PD = 0; i_PD < PD; ++i_PD) {
+//         Eigen::Map<const Eigen::ArrayXXd> EVal_Lur_mat(EVal_PD_Lur.data() + i_PD * para.N, para.N_Lur, para.N_phi*para.N_K);
+//         EVal_Lur_PD_mat(seqN(i_PD*para.N_Lur,para.N_Lur),all) = EVal_Lur_mat;
+//     }
+//
+//     auto worker = [&](size_t ii, unsigned thread_id) {
+//         //    size_t thread_id = 0;
+//         //    for (size_t ii = 0; ii < para.N*PD; ++ii) {
+//         size_t i_PD = ii / para.N;
+//         size_t i = ii - i_PD * para.N;
+//
+//         const auto EVal_Lur_mat = EVal_Lur_PD_mat(seqN(i_PD * para.N_Lur,para.N_Lur), all);
+//
+//         Pos pos;
+//         pos.i_phi = i / (para.N_K * para.N_Lur);
+//         pos.i_K = (i - pos.i_phi * para.N_K * para.N_Lur ) / para.N_Lur;
+//         pos.i_Lur = (i - pos.i_phi * para.N_K * para.N_Lur - pos.i_K * para.N_Lur ) / para.N_Lur;
+//         int i_state = static_cast<int>(pos.i_phi * para.N_K + pos.i_K);
+//
+//         //        cout << "i = " << i << "; pos.i_phi = " << pos.i_phi << "; pos.i_K = " << pos.i_K
+//         // << "; pos.i_Lur = " << pos.i_Lur << "; int i_N = " << i_N << endl;
+//
+//         double Lbase = para_vec.vec_Lur(pos.i_Lur);
+//
+//         double H_Lbase_ur = 0.0; double F_Lbase_ur = 0.0;
+//         if (InitialPeriod == 0) {
+//             H_Lbase_ur = CalHFcost_Lbase(para_est.c_H_ur, Lbase);
+//             if (Lbase < para.Lur_cutoff1) {
+//                 F_Lbase_ur = CalHFcost_Lbase(para_est.c_low_F_ur, Lbase);
+//             }
+//             else {
+//                 F_Lbase_ur = CalHFcost_Lbase(para_est.c_high_F_ur, Lbase);
+//             }
+//         }
+//
+//         ArrayXd diff_vec_L = para_vec.vec_Lur - Lbase;
+//         ArrayXd TotV = EVal_Lur_mat.col(i_state)
+//             - H_Lbase_ur * diff_vec_L.pow(2) * (diff_vec_L > 0).cast<double>()
+//             - F_Lbase_ur * diff_vec_L.pow(2) * (diff_vec_L <= 0).cast<double>()
+//             - wstar * para_vec.vec_Lur;
+//
+//         ArrayXd::Index max_Index;
+//         double Vdefault = TotV.maxCoeff(&max_Index);
+//         double xdefault =  para_vec.vec_Lur(max_Index);
+//
+//         OptLur_PD(ii) = xdefault;
+//         TotVOpt_PD(ii) = Vdefault;
+// //    }
+//     };
+//     MultiThreads::simple_parallel_for(worker, para.N*PD, threadsManagement);
+//
+//     return tuple<ArrayXd,ArrayXd>(OptLur_PD,TotVOpt_PD);
+// }
 
-/* Choose the targeted Luc to maximize the expected value by iteration */
-tuple<ArrayXd,ArrayXd> alias::solveOptLur_iteration(const int & PD, const ParaEst & para_est, const ParaVec & para_vec,
-    const ArrayXd & EVal_PD_Lur, const int & InitialPeriod, MultiThreads::Threads_Management & threadsManagement) {
-
-    ArrayXd TotVOpt_PD = ArrayXd::Zero(para.N*PD);
-    ArrayXd OptLur_PD = ArrayXd::Zero(para.N*PD);
-    const double wstar = para_est.w_ur * exp(0.5 * pow(para_est.sigma_Lerror_ur, 2));
-
-    ArrayXXd EVal_Lur_PD_mat( para.N_Lur*PD, para.N_phi * para.N_K);
-    for (int i_PD = 0; i_PD < PD; ++i_PD) {
-        Eigen::Map<const Eigen::ArrayXXd> EVal_Lur_mat(EVal_PD_Lur.data() + i_PD * para.N, para.N_Lur, para.N_phi*para.N_K);
-        EVal_Lur_PD_mat(seqN(i_PD*para.N_Lur,para.N_Lur),all) = EVal_Lur_mat;
-    }
-
-    auto worker = [&](size_t ii, unsigned thread_id) {
-        //    size_t thread_id = 0;
-        //    for (size_t ii = 0; ii < para.N*PD; ++ii) {
-        size_t i_PD = ii / para.N;
-        size_t i = ii - i_PD * para.N;
-
-        const auto EVal_Lur_mat = EVal_Lur_PD_mat(seqN(i_PD * para.N_Lur,para.N_Lur), all);
-
-        Pos pos;
-        pos.i_phi = i / (para.N_K * para.N_Lur);
-        pos.i_K = (i - pos.i_phi * para.N_K * para.N_Lur ) / para.N_Lur;
-        pos.i_Lur = (i - pos.i_phi * para.N_K * para.N_Lur - pos.i_K * para.N_Lur ) / para.N_Lur;
-        int i_state = static_cast<int>(pos.i_phi * para.N_K + pos.i_K);
-
-        //        cout << "i = " << i << "; pos.i_phi = " << pos.i_phi << "; pos.i_K = " << pos.i_K
-        // << "; pos.i_Lur = " << pos.i_Lur << "; int i_N = " << i_N << endl;
-
-        double Lbase = para_vec.vec_Lur(pos.i_Lur);
-
-        double H_Lbase_ur = 0.0; double F_Lbase_ur = 0.0;
-        if (InitialPeriod == 0) {
-            H_Lbase_ur = CalHFcost_Lbase(para_est.c_H_ur, Lbase);
-            if (Lbase < para.Lur_cutoff1) {
-                F_Lbase_ur = CalHFcost_Lbase(para_est.c_low_F_ur, Lbase);
-            }
-            else {
-                F_Lbase_ur = CalHFcost_Lbase(para_est.c_high_F_ur, Lbase);
-            }
-        }
-
-        ArrayXd diff_vec_L = para_vec.vec_Lur - Lbase;
-        ArrayXd TotV = EVal_Lur_mat.col(i_state)
-            - H_Lbase_ur * diff_vec_L.pow(2) * (diff_vec_L > 0).cast<double>()
-            - F_Lbase_ur * diff_vec_L.pow(2) * (diff_vec_L <= 0).cast<double>()
-            - wstar * para_vec.vec_Lur;
-
-        ArrayXd::Index max_Index;
-        double Vdefault = TotV.maxCoeff(&max_Index);
-        double xdefault =  para_vec.vec_Lur(max_Index);
-
-        OptLur_PD(ii) = xdefault;
-        TotVOpt_PD(ii) = Vdefault;
-//    }
-    };
-    MultiThreads::simple_parallel_for(worker, para.N*PD, threadsManagement);
-
-    return tuple<ArrayXd,ArrayXd>(OptLur_PD,TotVOpt_PD);
-}
-
-//// Find the optimal solution (Luc & Lur) in Step 3 and Step 4
+//// Find the optimal solution (Lur) in Step 2
 tuple<double,double,int> alias::solve1D_L_LinearSpline(const double & H, const double & F, const double & wstar,
     const double & Lbase, const ArrayXd & vec_L, const ArrayXd & EVal_L_vec) {
 
@@ -370,8 +373,6 @@ tuple<double,double,int> alias::solve1D_L_LinearSpline(const double & H, const d
     double Vdefault = TotV.maxCoeff(&max_Index);
     double xdefault = vec_L(max_Index);
     int i_L = max_Index;
-
-    double Ldefault = vec_L(i_L);
 
     double L_opt = vec_L(i_L); double v_max = Vdefault;
     int L_index_max = i_L;
@@ -454,8 +455,7 @@ tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_SE_logit(const ParaEst & 
         double x = dEVal_PD_SE_sigma(i);
         if (x <= 700) {
             double exp_x = exp(x);
-            double denom = 1.0 + exp_x;
-            ProbPD_S(i) = exp_x / denom;
+            ProbPD_S(i) = exp(x - log1p(exp_x));
             ProbPD_E(i) = 1.0 - ProbPD_S(i);
             Vprime_PD_up(i) = para_est.sigma_SE * log1p(exp_x) + para_est.sigma_SE * EVal_PD_E_sigma(i);
         }

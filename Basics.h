@@ -238,11 +238,8 @@ namespace alias {
         ArrayXd EVal_PD_Lur;
         ArrayXd OptLur_PD;
 
-        ArrayXd EVal_PD_K;
-        ArrayXd OptK_PD;
-
-        ArrayXd EVal_PD;
         ArrayXd EVal_PD_SE;
+        ArrayXd EVal_PD;
 
         ArrayXd ProbPD_P;
         ArrayXd ProbPD_D;
