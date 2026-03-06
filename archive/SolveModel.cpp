@@ -277,49 +277,37 @@ tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_PD(const ParaEst & para_e
 ArrayXd alias::CalEVal_Luc_error(const int & PD, const ParaVec & para_vec, const ArrayXd & EVal_PD,
     const double & sigmaL_uc, MultiThreads::Threads_Management & threadsManagement) {
 
-    ArrayXd EVprime_PD_ELuc(para.N*PD);
-    for (size_t i_PD = 0; i_PD<PD; ++i_PD) {
-        ArrayXd EVal = EVal_PD.segment(i_PD*para.N,para.N);
-        Eigen::Map<const Eigen::ArrayXXd> EVal_mat(EVal.data(),para.N_Luc,para.N_phi*para.N_K*para.N_Lur);
+    ArrayXd EVprime_PD_ELuc(para.N * PD);
+    const int N_Luc = para.N_Luc;
+    const int N_state = para.N_phi * para.N_K * para.N_Lur;
+    const double tail_upper = 1e60;
+
+    for (int i_PD = 0; i_PD < PD; ++i_PD) {
+        Eigen::Map<const Eigen::ArrayXXd> EVal_mat(EVal_PD.data() + i_PD * para.N, N_Luc, N_state);
 
         ArrayXd EVprime_ELuc(para.N);
         auto worker = [&](size_t i, unsigned thread_id) {
-//    for (size_t i = 0; i < para.N_phi*para.N_K*para.N_Lur; ++i) {
-            int i_phi = i / (para.N_K * para.N_Lur);
-            int i_K = (i - i_phi * para.N_K * para.N_Lur) / para.N_Lur;
-            int i_Lur = i - i_phi * para.N_K * para.N_Lur - i_K * para.N_Lur;
+            ArrayXd tempY = EVal_mat.col(static_cast<int>(i));
+            ArrayXXd coef_vec = LinearInterpolation1D_Coeff(para_vec.vec_Luc, tempY);
+            int i_base = static_cast<int>(i) * N_Luc;
 
-            ArrayXd tempY = EVal_mat.col(i);
-            ArrayXXd coef_vec = LinearInterpolation1D_Coeff(para_vec.vec_Lur, tempY);
-
-            for (size_t i_Luc = 0; i_Luc < para.N_Luc; ++i_Luc) {
+            for (int i_Luc = 0; i_Luc < N_Luc; ++i_Luc) {
                 double mu = log(para_vec.vec_Luc(i_Luc));
-                ArrayXd temp1 = ArrayXd::Zero(para.N_Luc+1);
-                ArrayXd temp2 = ArrayXd::Zero(para.N_Luc+1);
+                double value = coef_vec(0, 0) * lognormCDF(0.0, para_vec.vec_Luc(0), mu, sigmaL_uc)
+                             + coef_vec(0, 1) * lognormConditionalEpectation(0.0, para_vec.vec_Luc(0), mu, sigmaL_uc);
 
-                temp1(0) = coef_vec(0,0)
-                           *lognormCDF(0,para_vec.vec_Luc(0),mu,sigmaL_uc);
-                temp2(0) = coef_vec(0,1)
-                           *lognormConditionalEpectation(0,para_vec.vec_Luc(0),mu,sigmaL_uc);
-
-                for (size_t kk = 1; kk < para.N_Luc; ++kk) {
-                    temp1(kk) = coef_vec(kk,0)
-                                *lognormCDF(para_vec.vec_Luc(kk-1),para_vec.vec_Luc(kk),mu,sigmaL_uc);
-                    temp2(kk) = coef_vec(kk,1)
-                                *lognormConditionalEpectation(para_vec.vec_Luc(kk-1),para_vec.vec_Luc(kk),mu,sigmaL_uc);
+                for (int kk = 1; kk < N_Luc; ++kk) {
+                    value += coef_vec(kk, 0) * lognormCDF(para_vec.vec_Luc(kk - 1), para_vec.vec_Luc(kk), mu, sigmaL_uc);
+                    value += coef_vec(kk, 1) * lognormConditionalEpectation(para_vec.vec_Luc(kk - 1), para_vec.vec_Luc(kk), mu, sigmaL_uc);
                 }
-                temp1(para.N_Luc) = tempY(para.N_Luc-1)*lognormCDF(para_vec.vec_Luc(para.N_Luc-1),
-                                                                   1e60,mu,sigmaL_uc);
-                temp2(para.N_Luc) = 0.0;
 
-                EVprime_ELuc(i_phi * para.N_K * para.N_Lur * para.N_Luc + i_K * para.N_Lur * para.N_Luc
-                             + i_Lur * para.N_Luc + i_Luc) = (temp1 + temp2).sum();
+                value += tempY(N_Luc - 1) * lognormCDF(para_vec.vec_Luc(N_Luc - 1), tail_upper, mu, sigmaL_uc);
+                EVprime_ELuc(i_base + i_Luc) = value;
             }
-//    }
         };
-        MultiThreads::simple_parallel_for(worker, para.N_phi*para.N_K*para.N_Luc, threadsManagement);
+        MultiThreads::simple_parallel_for(worker, N_state, threadsManagement);
 
-        EVprime_PD_ELuc.segment(i_PD*para.N,para.N) = EVprime_ELuc;
+        EVprime_PD_ELuc.segment(i_PD * para.N, para.N) = EVprime_ELuc;
     }
 
     return EVprime_PD_ELuc;
