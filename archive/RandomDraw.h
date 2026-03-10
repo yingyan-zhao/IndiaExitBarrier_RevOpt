@@ -18,7 +18,7 @@ namespace alias {
     // Return a 'dim' x 'n_draws' matrix simulated from quasi-random uniform distribution
     ArrayXXd quasi_random_uniform(long dim, long n_draws);
 
-    ArrayXXd quasi_random_uniform_to_normal(ArrayXXd M, double mean, double stderr);
+    ArrayXXd alias::quasi_random_uniform_to_normal(const Eigen::Ref<const ArrayXXd>& M, double mean, double stderr);
 }
 
 #endif

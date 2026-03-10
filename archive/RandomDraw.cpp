@@ -53,16 +53,17 @@ ArrayXXd alias::quasi_random_uniform(long dim, long n_draws)
 
 
 // Return a 'dim' x 'n_draws' matrix simulated from quasi-random normal distribution
-ArrayXXd alias::quasi_random_uniform_to_normal(ArrayXXd M, double mean, double stderr) {
-    long n_rows = M.rows();
-    long n_cols = M.cols();
+ArrayXXd alias::quasi_random_uniform_to_normal(const Eigen::Ref<const ArrayXXd>& M,
+                                               double mean, double stderr) {
+    const Eigen::Index n_rows = M.rows();
+    const Eigen::Index n_cols = M.cols();
 
     boost::math::normal normal(mean, stderr);
-
     ArrayXXd MM(n_rows, n_cols);
-    for (long i = 0; i < n_rows; ++i) {
-        for (long j = 0; j < n_cols; ++j) {
-            MM(i, j) = boost::math::quantile(normal, M(i,j));
+
+    for (Eigen::Index i = 0; i < n_rows; ++i) {
+        for (Eigen::Index j = 0; j < n_cols; ++j) {
+            MM(i, j) = boost::math::quantile(normal, M(i, j));
         }
     }
     return MM;

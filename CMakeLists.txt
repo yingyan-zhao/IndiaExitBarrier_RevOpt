@@ -61,14 +61,19 @@ else()
     include_directories(${PROJECT_SOURCE_DIR}/ThirdParty/pcg-cpp-0.98/include)
 endif()
 #
-add_executable(StructureEstimationC main.cpp multithread_loop.h
-        Auxillaries.h Auxillaries.cpp Ipopt_wrapper.h Basics.h Basics.cpp SolveModel.h SolveModel.cpp
-        Interpolation_spline.cpp Interpolation_spline.h)
+add_executable(StructureEstimationC main.cpp multithread_loop.h Auxillaries.h Auxillaries.cpp
+        RandomDraw.h RandomDraw.cpp
+        Basics.h Basics.cpp SolveModel.h SolveModel.cpp SimulationData.h SimulationData.cpp
+        CounterfactualExercise.cpp CounterfactualExercise.h)
+#         Ipopt_wrapper.h )
+#Interpolation_spline.cpp Interpolation_spline.h
 #
-#    DFS.h direct_search.h soo.h RandomDraw.h RandomDraw.cpp
-#    SimulationData.h SimulationData.cpp SolveModel.h SolveModel.cpp
+#
+#
+#    DFS.h direct_search.h soo.h
+#    SimulationData.h SimulationData.cpp
 #    EstimationAuxiliary.cpp EstimationAuxiliary.h Estimation_IndirectInference.cpp Estimation_IndirectInference.h
-#    CounterfactualExercise.cpp CounterfactualExercise.h
+#
 #    EstimationIndirectInference_StandardDeviation.cpp EstimationIndirectInference_StandardDeviation.h)
 ##
 #
