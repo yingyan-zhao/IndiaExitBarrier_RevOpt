@@ -92,7 +92,7 @@
 			{
 				"command" : 7,
 				"file" : 0,
-				"line" : 82,
+				"line" : 84,
 				"parent" : 0
 			}
 		]
@@ -103,7 +103,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-O2 -march=native -mllvm -inline-threshold=20000 -mllvm -inlinehint-threshold=20000 -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.2.sdk -mmacosx-version-min=15.7 -fcolor-diagnostics"
+					"fragment" : "-g -fsanitize-address-use-after-scope  -fsanitize-address-use-after-return=always -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.2.sdk -mmacosx-version-min=15.7 -fcolor-diagnostics"
 				}
 			],
 			"defines" : 
@@ -154,7 +154,8 @@
 				7,
 				9,
 				11,
-				12
+				12,
+				15
 			]
 		}
 	],
@@ -164,7 +165,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-O2 -march=native -mllvm -inline-threshold=20000 -mllvm -inlinehint-threshold=20000",
+				"fragment" : "-g -fsanitize-address-use-after-scope  -fsanitize-address-use-after-return=always",
 				"role" : "flags"
 			},
 			{
@@ -198,7 +199,8 @@
 				7,
 				9,
 				11,
-				12
+				12,
+				15
 			]
 		},
 		{
@@ -211,7 +213,8 @@
 				6,
 				8,
 				10,
-				13
+				13,
+				14
 			]
 		}
 	],
@@ -293,6 +296,17 @@
 			"backtrace" : 1,
 			"path" : "CounterfactualExercise.h",
 			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "SolveModel_InitialPeriod.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "SolveModel_InitialPeriod.cpp",
+			"sourceGroupIndex" : 0
 		}
 	],
 	"type" : "EXECUTABLE"

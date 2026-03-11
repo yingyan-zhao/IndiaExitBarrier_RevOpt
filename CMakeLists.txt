@@ -64,7 +64,9 @@ endif()
 add_executable(StructureEstimationC main.cpp multithread_loop.h Auxillaries.h Auxillaries.cpp
         RandomDraw.h RandomDraw.cpp
         Basics.h Basics.cpp SolveModel.h SolveModel.cpp SimulationData.h SimulationData.cpp
-        CounterfactualExercise.cpp CounterfactualExercise.h)
+        CounterfactualExercise.cpp CounterfactualExercise.h
+        SolveModel_InitialPeriod.h
+        SolveModel_InitialPeriod.cpp)
 #         Ipopt_wrapper.h )
 #Interpolation_spline.cpp Interpolation_spline.h
 #

@@ -55,6 +55,17 @@ namespace alias
     NewtonResult SolvePowerEqPositiveNewton(const double & a, const double & alpha, const double & b, const double & c,
         const double & x_ini);
 
+
+    double solve_axalpha_plus_c_eq0(const double & a, const double & alpha, const double & c);
+
+    struct RootResult {
+        bool converged;
+        bool bracket_found;
+        double k;         // root estimate (k>0)
+        int iterations;
+    };
+    RootResult solve_k_equation_hybrid(const double & d1, const double & d0, const double & d2, const double & a);
+
 }
 
 

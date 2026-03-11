@@ -6,11 +6,12 @@
 #include "Basics.h"
 #include "SolveModel.h"
 #include "SimulationData.h"
-//
-// //#include "EstimationAuxiliary.h"
+#include "CounterfactualExercise.h"
+
+//// #include "EstimationAuxiliary.h"
 // //#include "Estimation_IndirectInference.h"
 // //#include "EstimationIndirectInference_StandardDeviation.h"
-// //#include "CounterfactualExercise.h"
+// //
 // //
 // ////#include "Ipopt_wrapper.h"
 // ////

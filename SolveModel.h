@@ -40,7 +40,6 @@ namespace alias
         // ArrayXXd EVal_PD_SE_mat;
     };
 
-
     /**************************************************************
     * solve value function for period >=1
     **************************************************************/
@@ -58,6 +57,7 @@ namespace alias
     ArrayXXd RevOpt_Prod_mat(const ParaEst & para_est, const ParaVec & para_vec);
     ArrayXXd RevOpt_Prod_vec(const ParaEst & para_est, const ParaVec & para_vec);
     tuple<double,double,double> RevOpt_Prod_ELur(const ParaEst & para_est, const double & phi, const double & K, const double & Lur);
+    tuple<double,double,double> RevOpt_Prod_K(const ParaEst & para_est, const double & phi, const double & K, const double & Lur);
 
     /**************************************************************
     * Within each loop: we solve it by backward induction
@@ -70,8 +70,7 @@ namespace alias
     ArrayXd CalEVal_Lur_error(const int & PD, const ParaVec & para_vec, const ArrayXd & EVal, const double & sigmaL_ur);
     /* Choose the targeted Lur to maximize the expected value */
     tuple<ArrayXd,ArrayXd,ArrayXd,ArrayXd> solveOptLur(const int & PD, const ParaEst & para_est, const ParaVec & para_vec,
-        const ArrayXd & EVal_PD, const ArrayXXd & RevOpt_Prod_mat, const int & InitialPeriod,
-        MultiThreads::Threads_Management & threadsManagement);
+        const ArrayXd & EVal_PD, const ArrayXXd & RevOpt_Prod_mat, MultiThreads::Threads_Management & threadsManagement);
     //// data structure to save position
     struct Pos {
         size_t i_phi;
@@ -100,7 +99,6 @@ namespace alias
     //// Entry and exit (Step 1)
     tuple<ArrayXd,ArrayXd,ArrayXd> calEV_ProbStatus_SE_logit(const ParaEst & para_est,
         const ArrayXd & ResVal_E, const ArrayXd & EVal, MultiThreads::Threads_Management & threadsManagement);
-
 
 }
 // ////    using namespace std;
@@ -142,12 +140,7 @@ namespace alias
 //
 //
 //
-//     /**************************************************************
-//     * Solve the value/policy function in the first period
-//     **************************************************************/
-//     tuple<EquStateV0,EquStateV0mat> solveV0(const ParaEst & para_est, const ParaVec & para_vec, const ArrayXd & Vprime,
-//         MultiThreads::Threads_Management & threadsManagement);
-//
+
 //     // //// Find the optimal solution (K)
 //     // tuple<ArrayXd,ArrayXd> alias::solveOptK(const int & PD, const ParaEst & para_est,const ParaVec & para_vec,
 //     //     const ArrayXd & EVal_PD_K, MultiThreads::Threads_Management & threadsManagement);

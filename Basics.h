@@ -278,22 +278,7 @@ namespace alias {
 // //        const int & state, const int & industry, const int & year, const int & gap_yr,
 // //        const int & GoodState, const int & LaborIntensive);
 // //
-//     /**************************************************************
-//     * Value function in the initial period
-//     **************************************************************/
-//     //// Equilibrium value/policy functions for period t == 0
-//     struct EquStateV0 {
-//         ArrayXd EVal_PD_K0;
-//         ArrayXd EVal_PD_Lur0;
-//
-//         ArrayXd OptK_PD0;
-//         ArrayXd OptLur_PD0;
-//
-//         ArrayXd EVal_PD0;
-//
-//         ArrayXd ProbPD_P0;
-//         ArrayXd ProbPD_D0;
-//     };
+
 // //
 //     //// Within each period, firms (Step1) entry or not (step2) choose capital (step3) choose Employ_ur (step4) choose Employ_uc.
 //     //// DiffEVal0 includes the value function at each interim steps.
@@ -303,11 +288,7 @@ namespace alias {
 //         ArrayXXd EVal_PD0_mat;
 //     };
 // //
-//     //// The equilibrium state of the initial period
-//     struct EquState0 {
-//         double F_Entry;
-//         double FirmMass;
-//     };
+
 // ////
 // //
 // ////    /**************************************************************

@@ -156,6 +156,34 @@ CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SimulationData.cpp -o CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.s
 
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: CMakeFiles/StructureEstimationC.dir/flags.make
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.cpp
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: CMakeFiles/StructureEstimationC.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o -MF CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o.d -o CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o -c /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.cpp
+
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.cpp > CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.i
+
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.cpp -o CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.s
+
+CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o: CMakeFiles/StructureEstimationC.dir/flags.make
+CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o: /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.cpp
+CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o: CMakeFiles/StructureEstimationC.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o -MF CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o.d -o CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o -c /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.cpp
+
+CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.cpp > CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.i
+
+CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.cpp -o CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.s
+
 # Object files for target StructureEstimationC
 StructureEstimationC_OBJECTS = \
 "CMakeFiles/StructureEstimationC.dir/main.cpp.o" \
@@ -163,7 +191,9 @@ StructureEstimationC_OBJECTS = \
 "CMakeFiles/StructureEstimationC.dir/RandomDraw.cpp.o" \
 "CMakeFiles/StructureEstimationC.dir/Basics.cpp.o" \
 "CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.o" \
-"CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o"
+"CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o" \
+"CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o" \
+"CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o"
 
 # External object files for target StructureEstimationC
 StructureEstimationC_EXTERNAL_OBJECTS =
@@ -174,10 +204,12 @@ StructureEstimationC: CMakeFiles/StructureEstimationC.dir/RandomDraw.cpp.o
 StructureEstimationC: CMakeFiles/StructureEstimationC.dir/Basics.cpp.o
 StructureEstimationC: CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.o
 StructureEstimationC: CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o
+StructureEstimationC: CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o
+StructureEstimationC: CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o
 StructureEstimationC: CMakeFiles/StructureEstimationC.dir/build.make
 StructureEstimationC: /opt/homebrew/Cellar/ipopt/3.14.19/lib/libipopt.dylib
 StructureEstimationC: CMakeFiles/StructureEstimationC.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable StructureEstimationC"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable StructureEstimationC"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/StructureEstimationC.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

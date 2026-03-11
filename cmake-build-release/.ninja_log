@@ -1,6 +1,9 @@
 # ninja log v6
 13	5897	1773140011720295287	CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.o	ce48f973d2ab1169
 4932	4990	1773138499563173753	StructureEstimationC	81e0ea0ac8237af0
-9	1984	1773084221212780244	CMakeFiles/StructureEstimationC.dir/main.cpp.o	9b624d9fa1753f79
-7	2691	1773070319258170505	CMakeFiles/StructureEstimationC.dir/Auxillaries.cpp.o	bceaefeda263740b
-10	2592	1773084221213407289	CMakeFiles/StructureEstimationC.dir/Basics.cpp.o	9ee76d6cd1d4eb6e
+6	1255	1773239465513591274	CMakeFiles/StructureEstimationC.dir/main.cpp.o	9b624d9fa1753f79
+8	2578	1773239379517935419	CMakeFiles/StructureEstimationC.dir/Auxillaries.cpp.o	bceaefeda263740b
+7	1966	1773239363428908449	CMakeFiles/StructureEstimationC.dir/RandomDraw.cpp.o	aa0d71a1f792bac4
+9	1877	1773239379518157710	CMakeFiles/StructureEstimationC.dir/Basics.cpp.o	9ee76d6cd1d4eb6e
+8	1515	1773239363429329781	CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o	69329ff24f310ab
+7	1335	1773239465514108148	CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o	78c6705ed5ea2212

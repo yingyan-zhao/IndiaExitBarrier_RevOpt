@@ -7,6 +7,7 @@
 
 #include "Basics.h"
 #include "SolveModel.h"
+#include "SolveModel_InitialPeriod.h"
 #include "SimulationData.h"
 
 //
@@ -95,9 +96,11 @@ namespace alias {
         main_SimulateStatusQuo(const ArrayXd &theta_Est_S, const SimVar &sim_var, const int &SimTbar,
         MultiThreads::Threads_Management &threadsManagement);
     //
-    tuple<ParaEst, ParaVec, EquStateV, EquStateVmat, EquStateV0, EquStateV0mat, EquState0, double, SimData>
-        SolveSimulate_StatusQuo_FEntry_V0( const ArrayXd &theta_Est, const SimVar &sim_var,
-        const int &GoodState, const int &LaborIntensive, MultiThreads::Threads_Management &threadsManagement);
+    tuple<ParaEst,ParaVec,EquStateV,EquStateV0,EquState0,SimData>
+        SolveSimulate_StatusQuo_FEntry_V0(const ArrayXd & theta_Est, const SimVar & sim_var,
+        const int & GoodState, const int & LaborIntensive, MultiThreads::Threads_Management & threadsManagement);
+
+
 
 }
 //
@@ -105,9 +108,6 @@ namespace alias {
 
 //
 ////
-//    ///* Solve the entry cost */
-//    double SolveFEntry_StatusQuoEqu(const ParaVec &para_vec, const EquStateV0 &EquV0);
-//
 //    /**********************************************************************************************
 //    * Simulation of firm distribution for Status quo / counterfactual
 //    **********************************************************************************************/

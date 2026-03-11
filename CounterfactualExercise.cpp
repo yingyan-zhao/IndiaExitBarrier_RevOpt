@@ -16,89 +16,92 @@ tuple<CounterFactVariable,CounterFactVariable,CounterFactVariable,CounterFactVar
     int LaborIntensive; int GoodState;
     /*** solve the equilibrium and simulate the data ***/
     LaborIntensive = 1; GoodState = 1;
-    tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_GoodLaborInt
+    tuple<ParaEst,ParaVec,EquStateV,EquStateV0,EquState0,SimData> t_StatusQuo_GoodLaborInt
             = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
     EquStateV EquV_GoodLaborInt_S = get<2>(t_StatusQuo_GoodLaborInt);
-    EquState0 Equ0_GoodLaborInt_S = get<6>(t_StatusQuo_GoodLaborInt);
-    double CapitalDemand_GoodLaborInt_S = get<7>(t_StatusQuo_GoodLaborInt);
-    SimData sim_data_GoodLaborInt_S = get<8>(t_StatusQuo_GoodLaborInt);
-    CounterFactVariable Value_StatusQuo_GoodLaborInt = CalEconomicVariable(Equ0_GoodLaborInt_S.FirmMass,
-        Equ0_GoodLaborInt_S.F_Entry,CapitalDemand_GoodLaborInt_S,sim_data_GoodLaborInt_S);
-
-    /*** Average Exit Rate by Age ***/
-    ArrayXd AvgExitRate_byAge_GoodLaborInt(SimTbar-1);
-    for (size_t t = 0; t < SimTbar-1; ++t) {
-        AvgExitRate_byAge_GoodLaborInt(t) = sim_data_GoodLaborInt_S.State_E.col(t+1).cast<double>().sum()
-            / sim_data_GoodLaborInt_S.State_S.col(t).cast<double>().sum();
-    }
-
-    /*** solve the equilibrium and simulate the data ***/
-    LaborIntensive = 1; GoodState = 0;
-    tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_BadLaborInt
-        = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
-    double p_K_BadLaborInt_S = para.p_K_StatusQuo;
-    EquStateV EquV_BadLaborInt_S = get<2>(t_StatusQuo_BadLaborInt);
-    EquState0 Equ0_BadLaborInt_S = get<6>(t_StatusQuo_BadLaborInt);
-    double CapitalDemand_BadLaborInt_S = get<7>(t_StatusQuo_BadLaborInt);
-    SimData sim_data_BadLaborInt_S = get<8>(t_StatusQuo_BadLaborInt);
-    CounterFactVariable Value_StatusQuo_BadLaborInt = CalEconomicVariable(p_K_BadLaborInt_S,
-        Equ0_BadLaborInt_S.FirmMass,Equ0_BadLaborInt_S.F_Entry,CapitalDemand_BadLaborInt_S,
-        sim_data_BadLaborInt_S);
-
-    /*** Average Exit Rate by Age ***/
-    ArrayXd AvgExitRate_byAge_BadLaborInt(SimTbar-1);
-    for (size_t t = 0; t < SimTbar-1; ++t) {
-        AvgExitRate_byAge_BadLaborInt(t) = sim_data_BadLaborInt_S.State_E.col(t+1).cast<double>().sum()
-            / sim_data_BadLaborInt_S.State_S.col(t).cast<double>().sum();
-    }
-
-    /*** solve the equilibrium and simulate the data ***/
-    LaborIntensive = 0; GoodState = 1;
-    tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_GoodCapitalInt
-        = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
-    double p_K_GoodCapitalInt_S = para.p_K_StatusQuo;
-    EquStateV EquV_GoodCapitalInt_S = get<2>(t_StatusQuo_GoodCapitalInt);
-    EquState0 Equ0_GoodCapitalInt_S = get<6>(t_StatusQuo_GoodCapitalInt);
-    double CapitalDemand_GoodCapitalInt_S = get<7>(t_StatusQuo_GoodCapitalInt);
-    SimData sim_data_GoodCapitalInt_S = get<8>(t_StatusQuo_GoodCapitalInt);
-    CounterFactVariable Value_StatusQuo_GoodCapitalInt = CalEconomicVariable(p_K_GoodCapitalInt_S,
-        Equ0_GoodCapitalInt_S.FirmMass,Equ0_GoodCapitalInt_S.F_Entry,CapitalDemand_GoodCapitalInt_S,
-        sim_data_GoodCapitalInt_S);
-
-    /*** Average Exit Rate by Age ***/
-    ArrayXd AvgExitRate_byAge_GoodCapitalInt(SimTbar-1);
-    for (size_t t = 0; t < SimTbar-1; ++t) {
-        AvgExitRate_byAge_GoodCapitalInt(t) = sim_data_GoodCapitalInt_S.State_E.col(t+1).cast<double>().sum()
-            / sim_data_GoodCapitalInt_S.State_S.col(t).cast<double>().sum();
-    }
-
-    /*** solve the equilibrium and simulate the data ***/
-    LaborIntensive = 0; GoodState = 0;
-    tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_BadCapitalInt
-            = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
-    double p_K_BadCapitalInt_S = para.p_K_StatusQuo;
-    EquStateV EquV_BadCapitalInt_S = get<2>(t_StatusQuo_BadCapitalInt);
-    EquState0 Equ0_BadCapitalInt_S = get<6>(t_StatusQuo_BadCapitalInt);
-    double CapitalDemand_BadCapitalInt_S = get<7>(t_StatusQuo_BadCapitalInt);
-    SimData sim_data_BadCapitalInt_S = get<8>(t_StatusQuo_BadCapitalInt);
-    CounterFactVariable Value_StatusQuo_BadCapitalInt = CalEconomicVariable(p_K_BadCapitalInt_S,
-        Equ0_BadCapitalInt_S.FirmMass,Equ0_BadCapitalInt_S.F_Entry,CapitalDemand_BadCapitalInt_S,
-        sim_data_BadCapitalInt_S);
-
-    /*** Average Exit Rate by Age ***/
-    ArrayXd AvgExitRate_byAge_BadCapitalInt(SimTbar-1);
-    for (size_t t = 0; t < SimTbar-1; ++t) {
-        AvgExitRate_byAge_BadCapitalInt(t) = sim_data_BadCapitalInt_S.State_E.col(t+1).cast<double>().sum()
-            / sim_data_BadCapitalInt_S.State_S.col(t).cast<double>().sum();
-    }
+    EquState0 Equ0_GoodLaborInt_S = get<4>(t_StatusQuo_GoodLaborInt);
+    SimData sim_data_GoodLaborInt_S = get<5>(t_StatusQuo_GoodLaborInt);
+    // CounterFactVariable Value_StatusQuo_GoodLaborInt = CalEconomicVariable(Equ0_GoodLaborInt_S.FirmMass,
+    //     Equ0_GoodLaborInt_S.F_Entry,CapitalDemand_GoodLaborInt_S,sim_data_GoodLaborInt_S);
+    //
+    // /*** Average Exit Rate by Age ***/
+    // ArrayXd AvgExitRate_byAge_GoodLaborInt(SimTbar-1);
+    // for (size_t t = 0; t < SimTbar-1; ++t) {
+    //     AvgExitRate_byAge_GoodLaborInt(t) = sim_data_GoodLaborInt_S.State_E.col(t+1).cast<double>().sum()
+    //         / sim_data_GoodLaborInt_S.State_S.col(t).cast<double>().sum();
+    // }
+    //
+    // /*** solve the equilibrium and simulate the data ***/
+    // LaborIntensive = 1; GoodState = 0;
+    // tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_BadLaborInt
+    //     = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
+    // EquStateV EquV_BadLaborInt_S = get<2>(t_StatusQuo_BadLaborInt);
+    // EquState0 Equ0_BadLaborInt_S = get<6>(t_StatusQuo_BadLaborInt);
+    // double CapitalDemand_BadLaborInt_S = get<7>(t_StatusQuo_BadLaborInt);
+    // SimData sim_data_BadLaborInt_S = get<8>(t_StatusQuo_BadLaborInt);
+    // CounterFactVariable Value_StatusQuo_BadLaborInt = CalEconomicVariable(p_K_BadLaborInt_S,
+    //     Equ0_BadLaborInt_S.FirmMass,Equ0_BadLaborInt_S.F_Entry,CapitalDemand_BadLaborInt_S,
+    //     sim_data_BadLaborInt_S);
+    //
+    // /*** Average Exit Rate by Age ***/
+    // ArrayXd AvgExitRate_byAge_BadLaborInt(SimTbar-1);
+    // for (size_t t = 0; t < SimTbar-1; ++t) {
+    //     AvgExitRate_byAge_BadLaborInt(t) = sim_data_BadLaborInt_S.State_E.col(t+1).cast<double>().sum()
+    //         / sim_data_BadLaborInt_S.State_S.col(t).cast<double>().sum();
+    // }
+    //
+    // /*** solve the equilibrium and simulate the data ***/
+    // LaborIntensive = 0; GoodState = 1;
+    // tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_GoodCapitalInt
+    //     = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
+    // double p_K_GoodCapitalInt_S = para.p_K_StatusQuo;
+    // EquStateV EquV_GoodCapitalInt_S = get<2>(t_StatusQuo_GoodCapitalInt);
+    // EquState0 Equ0_GoodCapitalInt_S = get<6>(t_StatusQuo_GoodCapitalInt);
+    // double CapitalDemand_GoodCapitalInt_S = get<7>(t_StatusQuo_GoodCapitalInt);
+    // SimData sim_data_GoodCapitalInt_S = get<8>(t_StatusQuo_GoodCapitalInt);
+    // CounterFactVariable Value_StatusQuo_GoodCapitalInt = CalEconomicVariable(p_K_GoodCapitalInt_S,
+    //     Equ0_GoodCapitalInt_S.FirmMass,Equ0_GoodCapitalInt_S.F_Entry,CapitalDemand_GoodCapitalInt_S,
+    //     sim_data_GoodCapitalInt_S);
+    //
+    // /*** Average Exit Rate by Age ***/
+    // ArrayXd AvgExitRate_byAge_GoodCapitalInt(SimTbar-1);
+    // for (size_t t = 0; t < SimTbar-1; ++t) {
+    //     AvgExitRate_byAge_GoodCapitalInt(t) = sim_data_GoodCapitalInt_S.State_E.col(t+1).cast<double>().sum()
+    //         / sim_data_GoodCapitalInt_S.State_S.col(t).cast<double>().sum();
+    // }
+    //
+    // /*** solve the equilibrium and simulate the data ***/
+    // LaborIntensive = 0; GoodState = 0;
+    // tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> t_StatusQuo_BadCapitalInt
+    //         = SolveSimulate_StatusQuo_FEntry_V0(theta_Est_S,sim_var,GoodState,LaborIntensive,threadsManagement);
+    // double p_K_BadCapitalInt_S = para.p_K_StatusQuo;
+    // EquStateV EquV_BadCapitalInt_S = get<2>(t_StatusQuo_BadCapitalInt);
+    // EquState0 Equ0_BadCapitalInt_S = get<6>(t_StatusQuo_BadCapitalInt);
+    // double CapitalDemand_BadCapitalInt_S = get<7>(t_StatusQuo_BadCapitalInt);
+    // SimData sim_data_BadCapitalInt_S = get<8>(t_StatusQuo_BadCapitalInt);
+    // CounterFactVariable Value_StatusQuo_BadCapitalInt = CalEconomicVariable(p_K_BadCapitalInt_S,
+    //     Equ0_BadCapitalInt_S.FirmMass,Equ0_BadCapitalInt_S.F_Entry,CapitalDemand_BadCapitalInt_S,
+    //     sim_data_BadCapitalInt_S);
+    //
+    // /*** Average Exit Rate by Age ***/
+    // ArrayXd AvgExitRate_byAge_BadCapitalInt(SimTbar-1);
+    // for (size_t t = 0; t < SimTbar-1; ++t) {
+    //     AvgExitRate_byAge_BadCapitalInt(t) = sim_data_BadCapitalInt_S.State_E.col(t+1).cast<double>().sum()
+    //         / sim_data_BadCapitalInt_S.State_S.col(t).cast<double>().sum();
+    // }
 
     // throw runtime_error("97");
+
+    CounterFactVariable Value_StatusQuo_GoodLaborInt;
+    CounterFactVariable Value_StatusQuo_BadLaborInt;
+    CounterFactVariable Value_StatusQuo_GoodCapitalInt;
+    CounterFactVariable Value_StatusQuo_BadCapitalInt;
 
     return tuple<CounterFactVariable,CounterFactVariable,CounterFactVariable,CounterFactVariable>(
         Value_StatusQuo_GoodLaborInt, Value_StatusQuo_BadLaborInt, Value_StatusQuo_GoodCapitalInt, Value_StatusQuo_BadCapitalInt);
 }
 
-tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData>
+tuple<ParaEst,ParaVec,EquStateV,EquStateV0,EquState0,SimData>
     alias::SolveSimulate_StatusQuo_FEntry_V0(const ArrayXd & theta_Est, const SimVar & sim_var,
     const int & GoodState, const int & LaborIntensive, MultiThreads::Threads_Management & threadsManagement) {
 
@@ -123,25 +126,26 @@ tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,
 
     //// With free entry condition, solve value/policy function at the initial t = 1
     //// not done yet.
-    tuple<EquStateV0,EquStateV0mat> t_Equ0 = solveV0(para_est,para_vec,EquV.EVal_PD,threadsManagement);
-    EquStateV0 EquV0 = get<0>(t_Equ0);
-    EquStateV0mat EVal0mat = get<1>(t_Equ0);
+    EquStateV0 EquV0 = solveV0(para_est,para_vec,EquV.EVal_PD,threadsManagement);
+
 
     EquState0 Equ0;
     Equ0.F_Entry = SolveFEntry_StatusQuoEqu(para_vec, EquV0);
     Equ0.FirmMass = 1.0;
     cout << "F_Entry = " << Equ0.F_Entry << endl;
+    throw runtime_error("135");
 
     //// Simulate the data to get the stationary distribution of capital employment
     /** simulate a series of random number **/
     int SimN = sim_var.lnphi_sim.rows();
     int SimTbar = sim_var.lnphi_sim.cols()-1;
-
-    /** simulate the data under the counterfactual data **/
-    SimData sim_data = Simulation_StatusQuo_Counterfactual(para_est, para_vec, EquV, EValmat,
-        EquV0, EVal0mat, sim_var, SimN, SimTbar, GoodState, LaborIntensive, threadsManagement);
-    double CapitalStock = (sim_data.Capital * sim_data.State_S.cast<double>()).sum() * Equ0.FirmMass;
-    cout << "CapitalStock = " << CapitalStock << endl;
+    //
+    // /** simulate the data under the counterfactual data **/
+    SimData sim_data;
+    // SimData sim_data = Simulation_StatusQuo_Counterfactual(para_est, para_vec, EquV, EValmat,
+    //     EquV0, EVal0mat, sim_var, SimN, SimTbar, GoodState, LaborIntensive, threadsManagement);
+    // double CapitalStock = (sim_data.Capital * sim_data.State_S.cast<double>()).sum() * Equ0.FirmMass;
+    // cout << "CapitalStock = " << CapitalStock << endl;
 // //
 // /    ArrayXd avgExitProb = sim_data.Prob_E.cast<double>().colwise().sum() / sim_data.Prob_S.cast<double>().colwise().sum();
 // /    cout << "avgExitProb = " << avgExitProb.transpose() << endl;
@@ -158,21 +162,10 @@ tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,
 // /            / tempD.cast<double>().colwise().sum();
 // /    cout << "avgProd_preDorm = " << avgProd_preDorm.transpose() << endl;
 
-    return tuple<ParaEst,ParaVec,EquStateV,EquStateVmat,EquStateV0,EquStateV0mat,EquState0,double,SimData> (para_est,
-        para_vec,EquV,EValmat,EquV0,EVal0mat,Equ0,CapitalStock,sim_data);
+    return tuple<ParaEst,ParaVec,EquStateV,EquStateV0,EquState0,SimData> (para_est,
+        para_vec,EquV,EquV0,Equ0,sim_data);
 }
 // //
-// /////* Solve the entry cost */
-// //double alias::SolveFEntry_StatusQuoEqu(const ParaVec & para_vec, const EquStateV0 & EquV0) {
-// //    double F_Entry;
-// //    //// calculate entry cost f^e
-// //    F_Entry = 0.0;
-// //    for (size_t k = 0; k < para.N_phi; ++k) {
-// //        F_Entry = F_Entry + para_vec.dist0(k) * EquV0.EVal_PD0(k*para.N_KL);
-// //    }
-// //
-// //    return F_Entry;
-// //}
 // //
 // ///**********************************************************************************************
 // //* Simulation of firm distribution for Status quo / counterfactual

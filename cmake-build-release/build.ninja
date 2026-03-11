@@ -105,6 +105,14 @@ build CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: CXX_COMP
   OBJECT_DIR = CMakeFiles/StructureEstimationC.dir
   OBJECT_FILE_DIR = CMakeFiles/StructureEstimationC.dir
 
+build CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o: CXX_COMPILER__StructureEstimationC_unscanned_Release /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.cpp || cmake_object_order_depends_target_StructureEstimationC
+  DEFINES = -DSOURCE_FOLDER=\"/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt\"
+  DEP_FILE = CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o.d
+  FLAGS = -O2 -march=native -mllvm -inline-threshold=20000 -mllvm -inlinehint-threshold=20000 -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.2.sdk -mmacosx-version-min=15.7 -fcolor-diagnostics
+  INCLUDES = -I/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0 -I/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/boost_1_78_0 -I/Users/yingyan_zhao/.local/include -I/Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/pcg-cpp-0.98/include -isystem /opt/homebrew/Cellar/ipopt/3.14.19/include/coin-or
+  OBJECT_DIR = CMakeFiles/StructureEstimationC.dir
+  OBJECT_FILE_DIR = CMakeFiles/StructureEstimationC.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target StructureEstimationC
@@ -113,7 +121,7 @@ build CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: CXX_COMP
 #############################################
 # Link the executable StructureEstimationC
 
-build StructureEstimationC: CXX_EXECUTABLE_LINKER__StructureEstimationC_Release CMakeFiles/StructureEstimationC.dir/main.cpp.o CMakeFiles/StructureEstimationC.dir/Auxillaries.cpp.o CMakeFiles/StructureEstimationC.dir/RandomDraw.cpp.o CMakeFiles/StructureEstimationC.dir/Basics.cpp.o CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.o CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o | /opt/homebrew/Cellar/ipopt/3.14.19/lib/libipopt.dylib
+build StructureEstimationC: CXX_EXECUTABLE_LINKER__StructureEstimationC_Release CMakeFiles/StructureEstimationC.dir/main.cpp.o CMakeFiles/StructureEstimationC.dir/Auxillaries.cpp.o CMakeFiles/StructureEstimationC.dir/RandomDraw.cpp.o CMakeFiles/StructureEstimationC.dir/Basics.cpp.o CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.o CMakeFiles/StructureEstimationC.dir/SimulationData.cpp.o CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o | /opt/homebrew/Cellar/ipopt/3.14.19/lib/libipopt.dylib
   FLAGS = -O2 -march=native -mllvm -inline-threshold=20000 -mllvm -inlinehint-threshold=20000 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.2.sdk -mmacosx-version-min=15.7
   LINK_LIBRARIES = /opt/homebrew/Cellar/ipopt/3.14.19/lib/libipopt.dylib
   OBJECT_DIR = CMakeFiles/StructureEstimationC.dir

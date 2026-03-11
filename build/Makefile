@@ -177,6 +177,30 @@ Basics.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/Basics.cpp.s
 .PHONY : Basics.cpp.s
 
+CounterfactualExercise.o: CounterfactualExercise.cpp.o
+.PHONY : CounterfactualExercise.o
+
+# target to build an object file
+CounterfactualExercise.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o
+.PHONY : CounterfactualExercise.cpp.o
+
+CounterfactualExercise.i: CounterfactualExercise.cpp.i
+.PHONY : CounterfactualExercise.i
+
+# target to preprocess a source file
+CounterfactualExercise.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.i
+.PHONY : CounterfactualExercise.cpp.i
+
+CounterfactualExercise.s: CounterfactualExercise.cpp.s
+.PHONY : CounterfactualExercise.s
+
+# target to generate assembly for a file
+CounterfactualExercise.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.s
+.PHONY : CounterfactualExercise.cpp.s
+
 RandomDraw.o: RandomDraw.cpp.o
 .PHONY : RandomDraw.o
 
@@ -249,6 +273,30 @@ SolveModel.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/SolveModel.cpp.s
 .PHONY : SolveModel.cpp.s
 
+SolveModel_InitialPeriod.o: SolveModel_InitialPeriod.cpp.o
+.PHONY : SolveModel_InitialPeriod.o
+
+# target to build an object file
+SolveModel_InitialPeriod.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.o
+.PHONY : SolveModel_InitialPeriod.cpp.o
+
+SolveModel_InitialPeriod.i: SolveModel_InitialPeriod.cpp.i
+.PHONY : SolveModel_InitialPeriod.i
+
+# target to preprocess a source file
+SolveModel_InitialPeriod.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.i
+.PHONY : SolveModel_InitialPeriod.cpp.i
+
+SolveModel_InitialPeriod.s: SolveModel_InitialPeriod.cpp.s
+.PHONY : SolveModel_InitialPeriod.s
+
+# target to generate assembly for a file
+SolveModel_InitialPeriod.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/StructureEstimationC.dir/build.make CMakeFiles/StructureEstimationC.dir/SolveModel_InitialPeriod.cpp.s
+.PHONY : SolveModel_InitialPeriod.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -288,6 +336,9 @@ help:
 	@echo "... Basics.o"
 	@echo "... Basics.i"
 	@echo "... Basics.s"
+	@echo "... CounterfactualExercise.o"
+	@echo "... CounterfactualExercise.i"
+	@echo "... CounterfactualExercise.s"
 	@echo "... RandomDraw.o"
 	@echo "... RandomDraw.i"
 	@echo "... RandomDraw.s"
@@ -297,6 +348,9 @@ help:
 	@echo "... SolveModel.o"
 	@echo "... SolveModel.i"
 	@echo "... SolveModel.s"
+	@echo "... SolveModel_InitialPeriod.o"
+	@echo "... SolveModel_InitialPeriod.i"
+	@echo "... SolveModel_InitialPeriod.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -1,5 +1,6 @@
-CMakeFiles/StructureEstimationC.dir/main.cpp.o: \
-  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/main.cpp \
+CMakeFiles/StructureEstimationC.dir/CounterfactualExercise.cpp.o: \
+  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.cpp \
+  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config_site \
@@ -1159,6 +1160,9 @@ CMakeFiles/StructureEstimationC.dir/main.cpp.o: \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0/Eigen/src/Eigenvalues/./RealQZ.h \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/map \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree \
+  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/multithread_loop.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/thread \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__thread/this_thread.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__thread/thread.h \
@@ -1169,7 +1173,6 @@ CMakeFiles/StructureEstimationC.dir/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/atomic_unique_lock.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/intrusive_list_view.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/stop_token.h \
-  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/multithread_loop.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/condition_variable \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__stop_token/stop_callback.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/future \
@@ -1204,7 +1207,6 @@ CMakeFiles/StructureEstimationC.dir/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/to_chars.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/set \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/Basics.h \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0/unsupported/Eigen/KroneckerProduct \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/eigen-3.4.0/unsupported/Eigen/../../Eigen/Core \
@@ -1744,8 +1746,6 @@ CMakeFiles/StructureEstimationC.dir/main.cpp.o: \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/boost_1_78_0/boost/math/distributions/detail/common_error_handling.hpp \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/ThirdParty/boost_1_78_0/boost/math/distributions/detail/derived_accessors.hpp \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel.h \
+  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.h \
   /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SimulationData.h \
-  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/RandomDraw.h \
-  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/CounterfactualExercise.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/map \
-  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/SolveModel_InitialPeriod.h
+  /Users/yingyan_zhao/Dropbox/StructureEstimationC20260304_SimplifiedModel_RevOpt/RandomDraw.h
