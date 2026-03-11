@@ -6,6 +6,34 @@ using namespace std;
 using namespace alias;
 // using namespace Ipopt_Wrapper;
 
+namespace {
+MatrixXd BuildLurTransitionWeights(const ArrayXd& vec_Lur, const double sigmaL_ur) {
+    const int N_Lur = static_cast<int>(vec_Lur.size());
+    const ArrayXd log_Lur = vec_Lur.log();
+    MatrixXd p_lur_transpose(N_Lur, N_Lur);
+    for (int i_Lur = 0; i_Lur < N_Lur; ++i_Lur) {
+        p_lur_transpose.col(i_Lur) =
+            NormalGridProbabilities(log_Lur, std::log(vec_Lur(i_Lur)), sigmaL_ur).matrix();
+    }
+    return p_lur_transpose;
+}
+
+ArrayXd ApplyLurTransitionWeights(const int PD, const ArrayXd& EVal_PD, const MatrixXd& p_lur_transpose) {
+    const int N_Lur = static_cast<int>(p_lur_transpose.rows());
+    const int N_phi_K = para.N_phi * para.N_K;
+
+    ArrayXd EVprime_PD_ELur(para.N * PD);
+    for (int i_PD = 0; i_PD < PD; ++i_PD) {
+        Eigen::Map<const MatrixXd> EVal_mat(EVal_PD.data() + i_PD * para.N, N_Lur, N_phi_K);
+        MatrixXd EVprime_mat(N_Lur, N_phi_K);
+        EVprime_mat.noalias() = p_lur_transpose.transpose() * EVal_mat;
+        Eigen::Map<ArrayXd>(EVprime_PD_ELur.data() + i_PD * para.N, para.N) =
+            Eigen::Map<const ArrayXd>(EVprime_mat.data(), para.N);
+    }
+    return EVprime_PD_ELur;
+}
+}
+
 /**************************************************************
 * solve value function for period >=1
 **************************************************************/
@@ -16,19 +44,21 @@ EquStateV alias::solveV(const ParaEst & para_est, const ParaVec & para_vec, Mult
     ArrayXd ResVal_E = calResidual_Value_Exit(para_est,para_vec);
     // Revenue per period
     ArrayXXd RevOpt_Prod_mat_val = RevOpt_Prod_mat(para_est, para_vec);
+    const MatrixXd p_lur_transpose = BuildLurTransitionWeights(para_vec.vec_Lur, para_est.sigma_Lerror_ur);
     // value function of the ending period
     ArrayXd Vprime_PD_ini = ArrayXd::Zero(para.N+para.N);
-    for (size_t n = 0; n < 50; ++n) {
+    const int max_iter = 50;
+    const double vf_tol = 1e-6;
+    for (int n = 0; n < max_iter; ++n) {
         //// the expected value function with the productivity transition
         int PD = 2;
         ArrayXd EVprime_PD = para.deltaV * CalEVprime_mat(PD,Vprime_PD_ini,para_vec.tran_phi);
 
         /// Step 3. solve L_ur
-        EquV_PD.EVal_PD_Lur_error = CalEVal_Lur_error(PD, para_vec, EVprime_PD, para_est.sigma_Lerror_ur); // With a chosen target, firms' expected value depends on the shocks on employment
+        EquV_PD.EVal_PD_Lur_error = ApplyLurTransitionWeights(PD, EVprime_PD, p_lur_transpose); // With a chosen target, firms' expected value depends on the shocks on employment
 
-        int InitialPeriod = 0; // whether this is the initial period.
         tuple<ArrayXd,ArrayXd,ArrayXd,ArrayXd> t_Lur = solveOptLur(PD, para_est, para_vec, EquV_PD.EVal_PD_Lur_error,
-        RevOpt_Prod_mat_val, InitialPeriod, threadsManagement);
+            RevOpt_Prod_mat_val, threadsManagement);
         EquV_PD.OptLur_P = get<0>(t_Lur);
         EquV_PD.OptLur_D = get<1>(t_Lur);
         EquV_PD.EVal_PD_OptLurP = get<2>(t_Lur);
@@ -48,7 +78,9 @@ EquStateV alias::solveV(const ParaEst & para_est, const ParaVec & para_vec, Mult
         EquV_PD.ProbPD_S = get<1>(t_SE);
         EquV_PD.ProbPD_E = get<2>(t_SE);
 
+        const double err = (EquV_PD.EVal_PD - Vprime_PD_ini).abs().maxCoeff();
         Vprime_PD_ini = EquV_PD.EVal_PD;
+        if (err < vf_tol) { break; }
     }
 
     //
@@ -136,7 +168,7 @@ ArrayXXd alias::RevOpt_Prod_vec(const ParaEst & para_est, const ParaVec & para_v
     return RevOpt_Prod;
 }
 
-//// Calculate the flow value added for every grids in the space
+//// Calculate the flow value added for every grids of Lur in the space
 tuple<double,double,double> alias::RevOpt_Prod_ELur(const ParaEst & para_est, const double & phi, const double & K, const double & Lur) {
 
     const double pi_term = pow(para_est.PI, para_est.sigma_tilde);
@@ -151,6 +183,21 @@ tuple<double,double,double> alias::RevOpt_Prod_ELur(const ParaEst & para_est, co
         * exp(0.5 * para_est.alpha_tilde_Lr * para_est.alpha_tilde_Lr * para_est.sigma_Lerror_ur * para_est.sigma_Lerror_ur);
     return tuple<double,double,double>(RevOpt,dRevOpt_dL,dRevOpt_dL_coef);
 }
+
+tuple<double,double,double> alias::RevOpt_Prod_K(const ParaEst & para_est, const double & phi, const double & K, const double & Lur) {
+
+    const double pi_term = pow(para_est.PI, para_est.sigma_tilde);
+    double logL_alpha = para_est.alpha_tilde_Lr * log(Lur)
+        + 0.5 * para_est.alpha_tilde_Lr * para_est.alpha_tilde_Lr * para_est.sigma_Lerror_ur * para_est.sigma_Lerror_ur;
+    double RevOpt = pi_term * phi * exp(logL_alpha) * pow(K,para_est.alpha_tilde_K);
+
+    double dRevOpt_dK = para_est.alpha_tilde_K * RevOpt / K;
+    double dRevOpt_dK_coef = para_est.alpha_tilde_K * pi_term * phi * exp(logL_alpha);
+
+    return tuple<double,double,double>(RevOpt,dRevOpt_dK,dRevOpt_dK_coef);
+}
+
+
 
 
 //
@@ -176,33 +223,13 @@ ArrayXd alias::CalEVprime_mat(const int & PD, const ArrayXd & Vprime_PD, const A
 ////// Step 3. solve Lur
 ///* With a chosen target, firms' expected value depends on the shocks on employment */
 ArrayXd alias::CalEVal_Lur_error(const int & PD, const ParaVec & para_vec, const ArrayXd & EVal_PD, const double & sigmaL_ur) {
-
-    const int N_Lur = para.N_Lur;
-    const int N_phi_K = para.N_phi * para.N_K;
-
-    // Precompute transition weights on the Lur grid once.
-    const ArrayXd log_Lur = para_vec.vec_Lur.log();
-    MatrixXd p_lur_transpose(N_Lur, N_Lur);
-    for (int i_Lur = 0; i_Lur < N_Lur; ++i_Lur) {
-        p_lur_transpose.col(i_Lur) =
-            NormalGridProbabilities(log_Lur, std::log(para_vec.vec_Lur(i_Lur)), sigmaL_ur).matrix();
-    }
-
-    ArrayXd EVprime_PD_ELur(para.N * PD);
-    for (int i_PD = 0; i_PD < PD; ++i_PD) {
-        Eigen::Map<const MatrixXd> EVal_mat(EVal_PD.data() + i_PD * para.N, N_Lur, N_phi_K);
-        MatrixXd EVprime_mat(N_Lur, N_phi_K);
-        EVprime_mat.noalias() = p_lur_transpose.transpose() * EVal_mat;
-        Eigen::Map<ArrayXd>(EVprime_PD_ELur.data() + i_PD * para.N, para.N) =
-            Eigen::Map<const ArrayXd>(EVprime_mat.data(), para.N);
-    }
-    return EVprime_PD_ELur;
+    const MatrixXd p_lur_transpose = BuildLurTransitionWeights(para_vec.vec_Lur, sigmaL_ur);
+    return ApplyLurTransitionWeights(PD, EVal_PD, p_lur_transpose);
 }
 
 ///* Choose the targeted Lur to maximize the expected value */
 tuple<ArrayXd,ArrayXd,ArrayXd,ArrayXd> alias::solveOptLur(const int & PD, const ParaEst & para_est, const ParaVec & para_vec,
-    const ArrayXd & EVal_PD, const ArrayXXd & RevOpt_Prod_mat, const int & InitialPeriod,
-    MultiThreads::Threads_Management & threadsManagement) {
+    const ArrayXd & EVal_PD, const ArrayXXd & RevOpt_Prod_mat, MultiThreads::Threads_Management & threadsManagement) {
 
     ArrayXd OptLur_P = ArrayXd::Zero(para.N*PD);
     ArrayXd OptLur_D = ArrayXd::Zero(para.N*PD);
@@ -217,13 +244,11 @@ tuple<ArrayXd,ArrayXd,ArrayXd,ArrayXd> alias::solveOptLur(const int & PD, const 
     // Hiring/firing adjustments depend only on Lbase grid; precompute once.
     ArrayXd H_Lbase_ur_vec = ArrayXd::Zero(N_Lur);
     ArrayXd F_Lbase_ur_vec = ArrayXd::Zero(N_Lur);
-    if (InitialPeriod == 0) {
-        for (int i_Lur = 0; i_Lur < N_Lur; ++i_Lur) {
-            const double Lbase = para_vec.vec_Lur(i_Lur);
-            const tuple<double,double> t_HF = CalHFcost_Lbase(para_est.c_H_ur, para_est.c_high_F_ur, para_est.c_low_F_ur, Lbase);
-            H_Lbase_ur_vec(i_Lur) = get<0>(t_HF);
-            F_Lbase_ur_vec(i_Lur) = get<1>(t_HF);
-        }
+    for (int i_Lur = 0; i_Lur < N_Lur; ++i_Lur) {
+        const double Lbase = para_vec.vec_Lur(i_Lur);
+        const tuple<double,double> t_HF = CalHFcost_Lbase(para_est.c_H_ur, para_est.c_high_F_ur, para_est.c_low_F_ur, Lbase);
+        H_Lbase_ur_vec(i_Lur) = get<0>(t_HF);
+        F_Lbase_ur_vec(i_Lur) = get<1>(t_HF);
     }
 
     for (int i_PD = 0; i_PD < PD; ++i_PD) {
@@ -591,8 +616,15 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
     const double & x0,const double & x1, const double & TotV0,const double & TotV1, const double & H, const double & F,
     const double & wstar, const double & Lbase, const double & phi, const double & K, const ParaEst & para_est) {
 
-    double L_opt = Lbase;
-    double v_max = TotV0;
+    double L_opt = (TotV0 > TotV1) ? x0 : x1;
+    double v_max = (TotV0 > TotV1) ? TotV0 : TotV1;
+
+    auto eval_value = [&](const double L, const double Adj) {
+        tuple<double,double,double> t_rev = RevOpt_Prod_ELur(para_est, phi, K, L);
+        const double rev = get<0>(t_rev);
+        return coef(0) + coef(1) * L - Adj * (L - Lbase) * (L - Lbase) - wstar * L + rev;
+    };
+
     if (Lbase <= x0 || Lbase >= x1) {
         double Adj = H;
         if (Lbase >= x1) {Adj = F;}
@@ -604,13 +636,13 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
 
         NewtonResult x_result = SolvePowerEqPositiveNewton(a, alpha, b, c, Lbase);
         double L_opt_temp = x_result.x;
-        if (L_opt_temp < x1 and L_opt_temp > x0) {
-            L_opt = L_opt_temp;
-            tuple<double,double,double> t_rev = RevOpt_Prod_ELur(para_est, phi, K, L_opt);
-            double rev = get<0>(t_rev);
-            v_max = coef(0) + coef(1)*L_opt - Adj*(L_opt-Lbase)*(L_opt-Lbase) - wstar*L_opt + rev;
+        if (x_result.converged && L_opt_temp < x1 && L_opt_temp > x0) {
+            const double v_max_temp = eval_value(L_opt_temp, Adj);
+            if (v_max_temp > v_max) {
+                L_opt = L_opt_temp;
+                v_max = v_max_temp;
+            }
         }
-        else {throw runtime_error("Errors in SolveMax_Linear1D_L_RevOpt 598");}
     }
     else {
         tuple<double,double,double> t_revLbase = RevOpt_Prod_ELur(para_est, phi, K, Lbase);
@@ -618,6 +650,10 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
         double dRevOpt_dLur_Lbase = get<1>(t_revLbase);
 
         double VLbase = coef(0) + coef(1) * Lbase - wstar * Lbase + revLbase;
+        if (VLbase > v_max) {
+            L_opt = Lbase;
+            v_max = VLbase;
+        }
         double dVLbase = coef(1) - wstar + dRevOpt_dLur_Lbase;
         if (dVLbase >= 0) {
             double Adj = H;
@@ -629,13 +665,13 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
 
             NewtonResult x_result = SolvePowerEqPositiveNewton(a, alpha, b, c, Lbase);
             double L_opt_temp = x_result.x;
-            if (L_opt_temp <= x1 and L_opt_temp >= Lbase) {
-                L_opt = L_opt_temp;
-                tuple<double,double,double> t_rev = RevOpt_Prod_ELur(para_est, phi, K, L_opt);
-                double rev = get<0>(t_rev);
-                v_max = coef(0) + coef(1)*L_opt - Adj*(L_opt-Lbase)*(L_opt-Lbase) - wstar*L_opt + rev;
+            if (x_result.converged && L_opt_temp <= x1 && L_opt_temp >= Lbase) {
+                const double v_max_temp = eval_value(L_opt_temp, Adj);
+                if (v_max_temp > v_max) {
+                    L_opt = L_opt_temp;
+                    v_max = v_max_temp;
+                }
             }
-            else {throw runtime_error("Errors in SolveMax_Linear1D_L_RevOpt 623");}
         } else {
             double Adj = F;
 
@@ -646,13 +682,13 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
 
             NewtonResult x_result = SolvePowerEqPositiveNewton(a, alpha, b, c, Lbase);
             double L_opt_temp = x_result.x;
-            if (L_opt_temp <= Lbase and L_opt_temp >= x0) {
-                L_opt = L_opt_temp;
-                tuple<double,double,double> t_rev = RevOpt_Prod_ELur(para_est, phi, K, L_opt);
-                double rev = get<0>(t_rev);
-                v_max = coef(0) + coef(1)*L_opt - Adj*(L_opt-Lbase)*(L_opt-Lbase) - wstar*L_opt + rev;
+            if (x_result.converged && L_opt_temp <= Lbase && L_opt_temp >= x0) {
+                const double v_max_temp = eval_value(L_opt_temp, Adj);
+                if (v_max_temp > v_max) {
+                    L_opt = L_opt_temp;
+                    v_max = v_max_temp;
+                }
             }
-            else {throw runtime_error("Errors in SolveMax_Linear1D_L_RevOpt 640");}
         }
     }
 
@@ -664,22 +700,40 @@ tuple<double, double> alias::SolveMax_Linear1D_L_RevOpt(const ArrayXd & coef, co
 tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_PD(const ParaEst & para_est,
     const ArrayXd & Vprime_LurP, const ArrayXd & Vprime_LurD, MultiThreads::Threads_Management & threadsManagement) {
 
-    ArrayXd log_diffV_PD = (Vprime_LurP - Vprime_LurD).log();
-    ArrayXd dEVal_PD_sigma(para.N * 2);
-    dEVal_PD_sigma.segment(0, para.N) = (log_diffV_PD.segment(0, para.N) - para_est.F_P_PP) / para_est.sigma_PD;
-    dEVal_PD_sigma.segment(para.N, para.N) = (log_diffV_PD.segment(para.N, para.N) - para_est.F_P_DP) / para_est.sigma_PD;
+    ArrayXd diffV_PD = Vprime_LurP - Vprime_LurD;
+    ArrayXd ProbPD_P = ArrayXd::Zero(para.N * 2);
+    ArrayXd ProbPD_D = ArrayXd::Ones(para.N * 2);
+    ArrayXd expF = ArrayXd::Zero(para.N * 2);
 
-    ArrayXd ProbPD_P = normCDF_vec(dEVal_PD_sigma);
-    ArrayXd ProbPD_D = 1.0 - ProbPD_P;
+    const double sigma_PD = para_est.sigma_PD;
+    const double sigma2_PD = sigma_PD * sigma_PD;
+    static const boost::math::normal stdn(0.0, 1.0);
 
-    ArrayXd expF(para.N*2);
-    expF.segment(0,para.N) = lognormalEY_lessX(exp(log_diffV_PD.segment(0,para.N)), para_est.F_P_PP, para_est.sigma_PD);
-    expF.segment(para.N,para.N) = lognormalEY_lessX(exp(log_diffV_PD.segment(para.N,para.N)), para_est.F_P_DP, para_est.sigma_PD);
+    auto worker = [&](size_t i_raw, unsigned thread_id) {
+        const int i = static_cast<int>(i_raw);
+        const double diff = diffV_PD(i);
+        if (diff <= 0.0) { return; }
+
+        const double mu = (i < para.N) ? para_est.F_P_PP : para_est.F_P_DP;
+        const double log_diff = std::log(diff);
+        const double z0 = (log_diff - mu) / sigma_PD;
+        const double p = boost::math::cdf(stdn, z0);
+        ProbPD_P(i) = p;
+        ProbPD_D(i) = 1.0 - p;
+
+        if (p > 0.0) {
+            const double z1 = (log_diff - mu - sigma2_PD) / sigma_PD;
+            const double scale = std::exp(mu + 0.5 * sigma2_PD);
+            expF(i) = scale * boost::math::cdf(stdn, z1) / p;
+        }
+    };
+    MultiThreads::simple_parallel_for(worker, para.N * 2, threadsManagement);
 
     ArrayXd EVal_PD_ProdDorm = (Vprime_LurP - expF) * ProbPD_P + Vprime_LurD * ProbPD_D;
 
     return tuple<ArrayXd,ArrayXd,ArrayXd>(EVal_PD_ProdDorm,ProbPD_P,ProbPD_D);
 }
+
 
 //// Step 1. Entry and exit ()
 tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_SE_logit(const ParaEst & para_est,
@@ -715,9 +769,6 @@ tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_SE_logit(const ParaEst & 
 }
 
 
-
-
-//
 
 //
 // //
@@ -827,104 +878,8 @@ tuple<ArrayXd,ArrayXd,ArrayXd> alias::calEV_ProbStatus_SE_logit(const ParaEst & 
 // }
 //
 // //
-// // /**************************************************************
-// // * Solve the value/policy function in the first period
-// // **************************************************************/
-// // tuple<EquStateV0,EquStateV0mat> alias::solveV0(const ParaEst & para_est, const ParaVec & para_vec, const ArrayXd & Vprime_PD,
-// //     MultiThreads::Threads_Management & threadsManagement) {
-// //
-// //     Rev RevOpt = RevOpt_Prod(para_est, para_vec);
-// //
-// //     EquStateV0 EquV0;
-// //     //// the expected value function with the productivity transition
-// //     int PD = 1;
-// //     ArrayXd EVprime_PD = para.deltaV * CalEVprime_mat(PD,Vprime_PD.segment(0,para.N), para_vec.tran_phi);
-// //
-// //     //// Firms always produce at the first period: EVal_PD_temp only have a dimension of para.N
-// //     EquV0.ProbPD_P0 = ArrayXd::Ones(para.N);
-// //     EquV0.ProbPD_D0 = ArrayXd::Zero(para.N);
-// //
-// //     EquV0.EVal_PD_Lur0 = CalEVal_Lur_error(PD, para_vec, EVprime_PD, para_est.sigma_Lerror_ur,threadsManagement); // With a chosen target, firms' expected value depends on the shocks on employment
-// //     int InitialPeriod = 1; // whether this is the initial period.
-// //     //// solve L_ur
-// //     tuple<ArrayXd,ArrayXd> t_Lur = solveOptLur(PD, para_est, para_vec,EquV0.EVal_PD_Lur0,InitialPeriod,threadsManagement);
-// //     EquV0.OptLur_PD0 = get<0>(t_Lur);
-// //     EquV0.EVal_PD_K0 = get<1>(t_Lur);
-// //
-// //     //// solve K
-// //     tuple<ArrayXd,ArrayXd> t_K = solveOptK(PD, para_est,para_vec,EquV0.EVal_PD_K0,InitialPeriod,threadsManagement);
-// //     EquV0.OptK_PD0 = get<0>(t_K);
-// //     EquV0.EVal_PD0 = get<1>(t_K);
-// //
-// //     EquStateV0mat EVal0mat;
-// //     Eigen::Map<const Eigen::ArrayXXd> temp_Lur0_mat(EquV0.EVal_PD_Lur0.data(),para.N_Lur,para.N_phi*para.N_K);
-// //     EVal0mat.EVal_PD_Lur0_mat =  temp_Lur0_mat;
-// //
-// //     Eigen::Map<const Eigen::ArrayXXd> temp_K0_mat(EquV0.EVal_PD_K0.data(),para.N_Lur,para.N_phi*para.N_K);
-// //     EVal0mat.EVal_PD_K0_mat = temp_K0_mat;
-// //
-// //     Eigen::Map<const Eigen::ArrayXXd> temp_0_mat(EquV0.EVal_PD0.data(),para.N_Lur,para.N_phi*para.N_K);
-// //     EVal0mat.EVal_PD0_mat = temp_0_mat;
-// //
-// //     return tuple<EquStateV0,EquStateV0mat>(EquV0,EVal0mat);
-// // }
-// // //
-// // /* Choose the targeted K to maximize the expected value */
-// // tuple<ArrayXd,ArrayXd> alias::solveOptK(const int & PD, const ParaEst & para_est,const ParaVec & para_vec,
-// //     const ArrayXd & EVal_PD_K, MultiThreads::Threads_Management & threadsManagement) {
-// //
-// //     ArrayXd TotVOpt_PD = ArrayXd::Zero(para.N*PD);
-// //     ArrayXd OptK_PD = ArrayXd::Zero(para.N*PD);
-// //
-// //     ArrayXXd EVal_K_PD_mat(para.N_Lur*PD, para.N_phi * para.N_K);
-// //     for (size_t i_PD = 0; i_PD < PD; ++i_PD) {
-// //         Eigen::Map<const Eigen::ArrayXXd> EVal_K_mat(EVal_PD_K.data() + i_PD * para.N, para.N_Lur, para.N_phi * para.N_K);
-// //         EVal_K_PD_mat(seqN(i_PD*para.N_Lur,para.N_Lur),all) = EVal_K_mat;
-// //     }
-// //
-// //     auto worker = [&](size_t ii, unsigned thread_id) {
-// // //    size_t thread_id = 0;
-// // //    for (size_t ii = 0; ii < para.N*PD; ++ii) {
-// //         size_t i_PD = ii / para.N;
-// //         size_t i = ii - i_PD * para.N;
-// //
-// //         Pos pos;
-// //         pos.i_phi = i / (para.N_K * para.N_Lur);
-// //         pos.i_K = (i - pos.i_phi * para.N_K * para.N_Lur) / para.N_Lur;
-// //         pos.i_Lur = i - pos.i_phi * para.N_K * para.N_Lur - pos.i_K * para.N_Lur;
-// //
-// //         ArrayXXd EVal_K_mat = EVal_K_PD_mat(seqN(i_PD*para.N_Lur,para.N_Lur),all);
-// //         ArrayXd EVal_K_vec = EVal_K_mat(pos.i_Lur, seqN(pos.i_phi * para.N_K, para.N_K));
-// //
-// //         double p_K = 1.0;
-// //
-// //         ArrayXd diff_vec_K = vec_K - Kbase;
-// //         ArrayXd TotV = EVal_K_vec - H * diff_vec_K.pow(2) * (diff_vec_K > 0).cast<double>()
-// //             - F * diff_vec_K.pow(2) * (diff_vec_K <= 0).cast<double>()
-// //             - rstar * vec_K
-// //             - p_K * (vec_K - Kbase) * (diff_vec_K > 0).cast<double>()
-// //             - c_K * p_K * (vec_K - Kbase) * (diff_vec_K <= 0).cast<double>();
-// //
-// //         ArrayXd::Index max_Index;
-// //         double Vdefault = TotV.maxCoeff(&max_Index);
-// //         double xdefault = vec_K(max_Index);
-// //         int i_K = max_Index;
-// //
-// //
-// //         tuple<double,double,int> t_K = solve1D_K_LinearSpline(H_Kbase,F_Kbase,
-// //             c_K,rstar,p_K,Kbase,para_vec.vec_K,EVal_K_vec);
-// //         OptK_PD(ii) = get<0>(t_K);
-// //         TotVOpt_PD(ii) = get<1>(t_K);
-// // //        cout << "i = " << i << "; Kbase = " << Kbase <<"; OptK(i) = " <<  OptK(i) << "; TotVOpt(i) = " << TotVOpt(i) << endl;
-// // //    }
-// //     };
-// //     MultiThreads::simple_parallel_for(worker, para.N*PD, threadsManagement);
-// // //    throw runtime_error("311");
-// //
-// //     return tuple<ArrayXd,ArrayXd>(OptK_PD,TotVOpt_PD);
-// // }
-//
-// //
+
+
 // //
 // /////**************************************************************
 // //// * Calculate the value function of the end period:

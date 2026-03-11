@@ -198,6 +198,123 @@ NewtonResult alias::SolvePowerEqPositiveNewton(const double & a, const double & 
     return {false, std::exp(y), max_iter};
 }
 
+/***********************************************************************************************
+// Solve a*x^alpha + c = 0, with x > 0.
+***********************************************************************************************/
+double alias::solve_axalpha_plus_c_eq0(const double & a, const double & alpha, const double & c) {
+    if (a == 0.0) throw std::invalid_argument("a must be nonzero");
+    if (alpha == 0.0) throw std::invalid_argument("alpha must be nonzero");
+
+    const double rhs = -c / a; // x^alpha = rhs
+
+    // If alpha is not an integer, require rhs > 0 for real solution
+    const bool alpha_is_integer = (std::floor(alpha) == alpha);
+    if (!alpha_is_integer && rhs <= 0.0) {
+        return -1.0;
+    }
+
+    // For integer alpha, negative rhs is fine only when 1/alpha leads to real odd root.
+    // Here we use pow for real-valued principal branch.
+    if (rhs < 0.0) {
+        // Conservative: reject negative rhs in this real-solver.
+        return -1.0;
+    }
+
+    return std::pow(rhs, 1.0 / alpha);
+}
+
+/***********************************************************************************************
+// Solve: d1*k^a + d0*k^(a-1) + d2 = 0, with k > 0
+***********************************************************************************************/
+RootResult alias::solve_k_equation_hybrid(const double & d1, const double & d0, const double & d2, const double & a) {
+    double k0 = 1000.0;
+    double tol = 1e-5;
+    int max_iter = 100;
+
+    auto f = [&](double k) {
+        return d1 * std::pow(k, a) + d0 * std::pow(k, a - 1.0) + d2;
+    };
+
+    auto fp = [&](double k) {
+        return d1 * a * std::pow(k, a - 1.0)
+             + d0 * (a - 1.0) * std::pow(k, a - 2.0);
+    };
+
+    // 1) Find positive bracket [kl, ku] with sign change
+    double kl = k0, ku = k0;
+    double fl = f(kl), fu = fl;
+
+    bool bracket = false;
+    double growth = 2.0;
+
+    for (int i = 0; i < 80; ++i) {
+        kl = k0 / std::pow(growth, i + 1);   // shrink left toward 0+
+        ku = k0 * std::pow(growth, i + 1);   // expand right
+        fl = f(kl);
+        fu = f(ku);
+
+        if (std::isfinite(fl) && std::isfinite(fu) && (fl == 0.0 || fu == 0.0 || fl * fu < 0.0)) {
+            bracket = true;
+            break;
+        }
+    }
+
+    if (!bracket) {
+        return {false, false, k0, 0};
+    }
+    if (fl == 0.0) return {true, true, kl, 0};
+    if (fu == 0.0) return {true, true, ku, 0};
+
+    // 2) Hybrid Newton + bisection inside bracket
+    double k = std::sqrt(kl * ku); // geometric midpoint works well on positive domain
+
+    for (int it = 1; it <= max_iter; ++it) {
+        double fk = f(k);
+        if (!std::isfinite(fk)) {
+            k = std::sqrt(kl * ku);
+            fk = f(k);
+        }
+
+        if (std::abs(fk) < tol) {
+            return {true, true, k, it};
+        }
+
+        // Try Newton step
+        double knew = k;
+        double d = fp(k);
+        if (std::isfinite(d) && std::abs(d) > 1e-14) {
+            double kn = k - fk / d;
+            // keep step inside bracket and positive
+            if (kn > kl && kn < ku && kn > 0.0 && std::isfinite(kn)) {
+                knew = kn;
+            } else {
+                knew = std::sqrt(kl * ku); // bisection fallback (geometric)
+            }
+        } else {
+            knew = std::sqrt(kl * ku);
+        }
+
+        double fnew = f(knew);
+
+        // Update bracket using sign
+        if (fl * fnew <= 0.0) {
+            ku = knew;
+            fu = fnew;
+        } else {
+            kl = knew;
+            fl = fnew;
+        }
+
+        k = knew;
+
+        // Bracket-width stopping check
+        if (std::abs(ku - kl) <= tol * (1.0 + std::abs(k))) {
+            return {true, true, k, it};
+        }
+    }
+
+    return {false, true, k, max_iter};
+}
 ///***********************************************************************************************
 //* normal pdf distribution
 //***********************************************************************************************/
